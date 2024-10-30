@@ -22,4 +22,7 @@ class Follow(models.Model):
         ]
 
     def __str__(self):
-        return f'Пользователь {self.user.username} подписан(а) на {self.following.username}'
+        return (
+            f'Пользователь {self.user.username} /'
+            f'подписан(а) на {self.following.username}'
+        )

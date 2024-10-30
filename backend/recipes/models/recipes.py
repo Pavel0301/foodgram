@@ -86,7 +86,12 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления блюда',
-        #validators,
+        validators=[
+            MinValueValidator(
+                1,
+                'Минимальное значение 1!'
+            )
+        ],
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -100,11 +105,13 @@ class Recipe(models.Model):
 
         ordering = ('-created_at',)
 
+
     def __str__(self):
         return self.name
 
 class IngredientInRecipe(models.Model):
     """Модели для описания ингредиента в рецепте."""
+
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -122,14 +129,14 @@ class IngredientInRecipe(models.Model):
         validators=[
             MinValueValidator(
                 1,
-                message='Минимальное количество 1!'
+                message='Минимальное количество 1!',
             )
-        ]
+        ],
     )
 
     class Meta:
-        verbose_name='Ингредиент в рецепте'
-        verbose_name_plural='Ингредиенты в рецепте'
+        verbose_name = 'Ингредиент в рецепте'
+        verbose_name_plural = 'Ингредиенты в рецепте'
         constraints = [
             models.UniqueConstraint(
                 fields=('recipe', 'ingredient'),
@@ -152,12 +159,12 @@ class TagInRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        verbose_name='Рецепт'
+        verbose_name='Рецепт',
     )
 
     class Meta:
-        verbose_name='Тег рецепта'
-        verbose_name_plural='Теги рецепта'
+        verbose_name = 'Тег рецепта'
+        verbose_name_plural = 'Теги рецепта'
         constraints = [
             models.UniqueConstraint(
                 fields=['tag', 'recipe'],
@@ -196,6 +203,7 @@ class ShoppingCart(models.Model):
 
 class Favorite(models.Model):
     """Модель для описания избранного пользователя."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -209,8 +217,8 @@ class Favorite(models.Model):
     )
 
     class Meta:
-        verbose_name='Избранное'
-        verbose_name_plural='Избранное',
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное',
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],

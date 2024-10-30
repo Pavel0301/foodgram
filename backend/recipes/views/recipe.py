@@ -66,7 +66,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer = AddFavoriteSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
         if favorite.exists():
             favorite.delete()
             return Response(
@@ -111,7 +110,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     def _put_ingredients_in_file(self, ingredients):
-        text=''
+        text = ''
         for ingredient in ingredients:
             text += (
                 f"{ingredient['ingredients__name']} "
@@ -131,7 +130,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).annotate(
             sum=Sum('amount')
         )
-        ingredients_list =self._put_ingredients_in_file(ingredients)
+        ingredients_list = self._put_ingredients_in_file(ingredients)
         return Response(ingredients_list, content_type='text/plain')
 
 

@@ -1,10 +1,17 @@
 from common.serializers import ImageMixin, ImageUrlMixin
-from recipes.models.recipes import (Ingredient, IngredientInRecipe, Recipe,
-                                    ShoppingCart, Tag)
-from recipes.serializers.nested.recipe import (CreateIngredientsInSerializer,
-                                               IngredientsInRecipeSerializer,
-                                               TagSerializer)
-from rest_framework import serializers, validators
+from recipes.models.recipes import (
+    Ingredient,
+    IngredientInRecipe,
+    Recipe,
+    ShoppingCart,
+    Tag
+)
+from recipes.serializers.nested.recipe import (
+    CreateIngredientsInSerializer,
+    IngredientsInRecipeSerializer,
+    TagSerializer
+)
+from rest_framework import serializers
 from users.models.follows import Follow
 from users.serializers.api.users import UserSerializer
 
@@ -94,10 +101,16 @@ class CreateRecipeSerializer(serializers.ModelSerializer, ImageUrlMixin):
         ingredients = data.get('ingredients')
         if ingredients:
             for ingredient in ingredients:
-                if not ingredient.get('name') or not ingredient.get('measurement_unit'):
-                    raise serializers.ValidationError('У ингредиентов должно быть название и мера')
+                if not ingredient.get('name') or not ingredient.get(
+                        'measurement_unit'
+                ):
+                    raise serializers.ValidationError(
+                        'У ингредиентов должно быть название и мера'
+                    )
                 if ingredient.name in ingredients:
-                    raise serializers.ValidationError('Ингредиенты не должны повторяться')
+                    raise serializers.ValidationError(
+                        'Ингредиенты не должны повторяться'
+                    )
                 ingredients_list.append(ingredient.name)
         return data
 

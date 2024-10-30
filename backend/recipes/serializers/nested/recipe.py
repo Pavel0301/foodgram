@@ -22,7 +22,6 @@ class RecipeShortSerializer(serializers.Serializer, ImageMixin):
         )
 
 
-
 class TagSerializer(serializers.ModelSerializer):
     """Сериализатор для тегов."""
 
@@ -62,7 +61,9 @@ class CreateIngredientsInSerializer(serializers.ModelSerializer):
     @staticmethod
     def validate_amount(value):
         if value < 1:
-            raise serializers.ValidationError('Количество ингредиента не может быть меньше 1.')
+            raise serializers.ValidationError(
+                'Количество ингредиента не может быть меньше 1.'
+            )
         return value
 
     class Meta:
