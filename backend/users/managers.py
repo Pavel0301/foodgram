@@ -25,7 +25,6 @@ class CustomUserManager(BaseUserManager):
         if email:
             user.email = email
 
-
         user.set_password(password)
         user.save(using=self._db)
 

@@ -1,16 +1,9 @@
 from common.serializers import ImageMixin, ImageUrlMixin
-from recipes.models.recipes import (
-    Ingredient,
-    IngredientInRecipe,
-    Recipe,
-    ShoppingCart,
-    Tag
-)
-from recipes.serializers.nested.recipe import (
-    CreateIngredientsInSerializer,
-    IngredientsInRecipeSerializer,
-    TagSerializer
-)
+from recipes.models.recipes import (Ingredient, IngredientInRecipe, Recipe,
+                                    ShoppingCart, Tag)
+from recipes.serializers.nested.recipe import (CreateIngredientsInSerializer,
+                                               IngredientsInRecipeSerializer,
+                                               TagSerializer)
 from rest_framework import serializers
 from users.models.follows import Follow
 from users.serializers.api.users import UserSerializer
@@ -142,7 +135,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer, ImageUrlMixin):
         self._create_tags(tags, recipe)
         self._create_ingredients(ingredients, recipe)
         return recipe
-
 
     def to_representation(self, instance):
         """Метод сериализации рецепта."""

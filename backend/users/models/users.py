@@ -20,7 +20,7 @@ class User(AbstractUser):
         verbose_name='Электронная почта',
         unique=True,
         error_messages={
-            'unique': 'Пользователь с такой электронной почтой уже зарегистрирован!'
+            'unique': 'Пользователь с таким email уже существует!'
         }
     )
     username = models.CharField(

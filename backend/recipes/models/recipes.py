@@ -105,9 +105,9 @@ class Recipe(models.Model):
 
         ordering = ('-created_at',)
 
-
     def __str__(self):
         return self.name
+
 
 class IngredientInRecipe(models.Model):
     """Модели для описания ингредиента в рецепте."""
@@ -175,6 +175,7 @@ class TagInRecipe(models.Model):
     def __str__(self):
         return f'{self.tag} {self.recipe}'
 
+
 class ShoppingCart(models.Model):
     """Модели для описания Корзины покупок."""
 
@@ -191,8 +192,8 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
-        verbose_name='Корзина покупок'
-        verbose_name_plural='Корзины покупок'
+        verbose_name = 'Корзина покупок'
+        verbose_name_plural = 'Корзины покупок'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
