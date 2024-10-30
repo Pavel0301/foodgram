@@ -1,10 +1,7 @@
-from rest_framework import validators
-from rest_framework import serializers
-
-from recipes.models.recipes import Recipe
 from recipes.serializers.nested.recipe import OptionalRecipeSerializer
-from users.models.users import User
+from rest_framework import serializers, validators
 from users.models.follows import Follow
+from users.models.users import User
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -58,7 +55,7 @@ class FollowSerializer(serializers.ModelSerializer):
         )
 
 
-class FollowSerializer(serializers.ModelSerializer):
+class FollowInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Follow

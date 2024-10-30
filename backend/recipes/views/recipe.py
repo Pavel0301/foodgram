@@ -1,33 +1,21 @@
+from common.pagination import CustomPaginator
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.permissions import (
-    IsAuthenticatedOrReadOnly,
-    SAFE_METHODS,
-    IsAuthenticated,
-    AllowAny
-)
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.response import Response
-
-from common.pagination import CustomPaginator
-from recipes.filters import RecipeFilter, IngredientFilter
-from recipes.models.recipes import (
-    Recipe,
-    Favorite,
-    IngredientInRecipe,
-    ShoppingCart,
-    Ingredient,
-    Tag
-)
-from recipes.serializers.api.recipe import (
-    RecipeSerializer,
-    CreateRecipeSerializer,
-    AddFavoriteSerializer,
-    IngredientSerializer,
-)
+from recipes.filters import IngredientFilter, RecipeFilter
+from recipes.models.recipes import (Favorite, Ingredient, IngredientInRecipe,
+                                    Recipe, ShoppingCart, Tag)
+from recipes.serializers.api.recipe import (AddFavoriteSerializer,
+                                            CreateRecipeSerializer,
+                                            IngredientSerializer,
+                                            RecipeSerializer)
 from recipes.serializers.nested.recipe import TagSerializer
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import (SAFE_METHODS, AllowAny,
+                                        IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

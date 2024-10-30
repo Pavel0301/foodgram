@@ -1,20 +1,12 @@
-from rest_framework import serializers, validators
-
 from common.serializers import ImageMixin, ImageUrlMixin
-from recipes.models.recipes import (
-    Recipe,
-    Tag,
-    Ingredient,
-    IngredientInRecipe, ShoppingCart,
-)
-from recipes.serializers.nested.recipe import (
-    TagSerializer,
-    CreateIngredientsInSerializer
-)
+from recipes.models.recipes import (Ingredient, IngredientInRecipe, Recipe,
+                                    ShoppingCart, Tag)
+from recipes.serializers.nested.recipe import (CreateIngredientsInSerializer,
+                                               IngredientsInRecipeSerializer,
+                                               TagSerializer)
+from rest_framework import serializers, validators
 from users.models.follows import Follow
 from users.serializers.api.users import UserSerializer
-
-from recipes.serializers.nested.recipe import IngredientsInRecipeSerializer
 
 
 class IngredientSerializer(serializers.ModelSerializer):

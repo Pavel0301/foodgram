@@ -1,9 +1,9 @@
+from common.serializers import ImageMixin
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError
-
-from common.serializers import ImageMixin
-from users.models.users import User
 from users.models.follows import Follow
+from users.models.users import User
+
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Сериализатор для регистрации новых пользователей."""

@@ -1,7 +1,6 @@
-from rest_framework import serializers
-
 from common.serializers import ImageMixin
-from recipes.models.recipes import Recipe, Tag, IngredientInRecipe
+from recipes.models.recipes import IngredientInRecipe, Recipe, Tag
+from rest_framework import serializers
 
 
 class RecipeShortSerializer(serializers.Serializer, ImageMixin):
