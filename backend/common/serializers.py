@@ -20,5 +20,6 @@ class Base64ImageField(serializers.ImageField):
 class ImageMixin:
     image = Base64ImageField(required=False, allow_null=True)
 
+
 class ImageUrlMixin:
     image = Base64ImageField(use_url=True)

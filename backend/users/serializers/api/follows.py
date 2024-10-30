@@ -83,4 +83,3 @@ class FollowSerializer(serializers.ModelSerializer):
             instance.following,
             context={"request": self.context.get("request")},
         ).data
-

@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import (
     MinValueValidator,
-    RegexValidator,
 )
 
 
@@ -124,7 +123,10 @@ class IngredientInRecipe(models.Model):
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
         validators=[
-            MinValueValidator(1, message='Минимальное количество 1!')
+            MinValueValidator(
+                1,
+                message='Минимальное количество 1!'
+            )
         ]
     )
 

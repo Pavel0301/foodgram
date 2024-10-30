@@ -11,7 +11,6 @@ from recipes.serializers.nested.recipe import (
     TagSerializer,
     CreateIngredientsInSerializer
 )
-from users.models.users import User
 from users.models.follows import Follow
 from users.serializers.api.users import UserSerializer
 
@@ -36,7 +35,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     ingredients = IngredientsInRecipeSerializer(
         many=True,
-        #sorce='ingredient_list',
+        sorce='ingredient_list',
     )
     author = UserSerializer()
     is_favorited = serializers.SerializerMethodField()

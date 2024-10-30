@@ -83,5 +83,3 @@ class UserSearchSerializer(serializers.ModelSerializer):
             'username',
             'full_name',
         )
-
-
