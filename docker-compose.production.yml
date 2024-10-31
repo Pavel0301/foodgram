@@ -18,12 +18,16 @@ services:
     volumes:
       - static:/backend_static
       - media:/media
+    depends_on:
+      - db
+
   frontend:
     env_file: .env
     image: papoken/foodgram_frontend
     command: cp -r /app/build/. /static/
     volumes:
       - static:/static
+
   gateway:
     image: papoken/foodgram_gateway
     env_file: .env
@@ -34,3 +38,6 @@ services:
       - media:/app/media/
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
+    depends_on:
+      - backend
+      - frontend
