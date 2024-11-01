@@ -49,21 +49,30 @@ class TagSerializer(serializers.ModelSerializer):
 
 class IngredientsInRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для ингредиентов в рецепте."""
-    id = serializers.ReadOnlyField(source='ingredients.id')
-    name = serializers.ReadOnlyField(source='ingredients.name')
+
+    id = serializers.IntegerField()
     amount = serializers.IntegerField()
-    measurement_unit = serializers.ReadOnlyField(
-        source='ingredients.measurement_unit'
-    )
+    name = serializers.SerializerMethodField()
+    measurement_unit = serializers.SerializerMethodField()
 
     class Meta:
         model = IngredientInRecipe
         fields = (
             'id',
-            'name',
             'amount',
-            'measurement_unit',
+            'name',
+            'measurement_unit'
         )
+
+    def get_name(self, obj):
+        ingredient = IngredientInRecipe.objects.filter(
+            id=obj.id).values('ingredients__name')
+        return ingredient[0]['ingredients__name']
+
+    def get_measurement_unit(self, obj):
+        ingredient = IngredientInRecipe.objects.filter(
+            id=obj.id).values('ingredients__measurement_unit')
+        return ingredient[0]['ingredients__measurement_unit']
 
 
 class CreateIngredientsInRecipeSerializer(serializers.ModelSerializer):
