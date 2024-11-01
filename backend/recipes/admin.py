@@ -16,7 +16,7 @@ class IngredientAdmin(BaseAdmin):
     list_display = ('name', 'measurement_unit')
     search_fields = ('name', )
     list_filter = ('name', )
-    inlines = (IngredientInRecipeInline, )
+
 
 
 @admin.register(Tag)
