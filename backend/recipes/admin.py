@@ -18,7 +18,6 @@ class IngredientAdmin(BaseAdmin):
     list_filter = ('name', )
 
 
-
 @admin.register(Tag)
 class TagAdmin(BaseAdmin):
     list_display = ('name', 'slug')
