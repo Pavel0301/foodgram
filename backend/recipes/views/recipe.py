@@ -127,7 +127,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         return text
 
-
     @action(
         methods=['GET', ],
         detail=False,
@@ -161,6 +160,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет работы с обьектами класса Tag."""
