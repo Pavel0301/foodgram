@@ -1,5 +1,6 @@
-from recipes.serializers.nested.recipe import OptionalRecipeSerializer
 from rest_framework import serializers, validators
+
+from recipes.serializers.nested.recipe import OptionalRecipeSerializer
 from users.models.follows import Follow
 from users.models.users import User
 

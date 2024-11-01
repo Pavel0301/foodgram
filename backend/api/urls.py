@@ -1,4 +1,5 @@
 from django.urls import include, path
+
 from recipes.urls import urlpatterns as recipe_s
 from users.urls import urlpatterns as user_s
 

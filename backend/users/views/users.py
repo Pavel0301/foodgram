@@ -7,6 +7,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+
 from users.models.follows import Follow
 from users.serializers.api import users as user_s
 from users.serializers.api.follows import FollowSerializer

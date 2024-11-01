@@ -1,5 +1,6 @@
-from common.admin import BaseAdmin
 from django.contrib import admin
+
+from common.admin import BaseAdmin
 from users.models.users import User
 
 from .models.follows import Follow

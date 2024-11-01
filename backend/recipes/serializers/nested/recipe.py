@@ -1,6 +1,19 @@
-from common.serializers import ImageMixin
-from recipes.models.recipes import IngredientInRecipe, Recipe, Tag
 from rest_framework import serializers
+
+from common.serializers import ImageMixin
+from recipes.models.recipes import Ingredient, IngredientInRecipe, Recipe, Tag
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор модели ингредиентов."""
+
+    class Meta:
+        model = Ingredient
+        fields = (
+            'id',
+            'name',
+            'measurement_unit'
+        )
 
 
 class RecipeShortSerializer(serializers.Serializer, ImageMixin):
@@ -53,7 +66,7 @@ class IngredientsInRecipeSerializer(serializers.ModelSerializer):
         )
 
 
-class CreateIngredientsInSerializer(serializers.ModelSerializer):
+class CreateIngredientsInRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для создания ингредиентов в рецепте"""
     id = serializers.IntegerField()
     amount = serializers.IntegerField()

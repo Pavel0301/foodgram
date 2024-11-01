@@ -1,29 +1,28 @@
-from common.pagination import CustomPaginator
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated
+from rest_framework.response import Response
+
 from recipes.filters import IngredientFilter, RecipeFilter
 from recipes.models.recipes import (Favorite, Ingredient, IngredientInRecipe,
                                     Recipe, ShoppingCart, Tag)
+from recipes.permissions import IsAdminOrReadOnly, IsAuthor
 from recipes.serializers.api.recipe import (AddFavoriteSerializer,
                                             CreateRecipeSerializer,
-                                            IngredientSerializer,
                                             RecipeSerializer)
-from recipes.serializers.nested.recipe import TagSerializer
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import (SAFE_METHODS, AllowAny,
-                                        IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
-from rest_framework.response import Response
+from recipes.serializers.nested.recipe import (IngredientSerializer,
+                                               TagSerializer)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для работы запросов к рецептам."""
 
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    pagination_classes = (CustomPaginator,)
+    pagination_classes = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
@@ -40,6 +39,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return (IsAuthenticated(),)
+        if self.action in ['destroy', 'update', 'partial_update']:
+            return (IsAuthor(),)
+        return (AllowAny(),)
 
     @action(
         detail=True,
@@ -79,6 +85,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
+        methods=['POST', 'DELETE'],
+        permission_classes=[IsAuthenticated, ],
     )
     def shopping_card(self, request, pk):
         """Метод позваоляет управлять корзиной."""
@@ -119,6 +127,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         return text
 
+
+    @action(
+        methods=['GET', ],
+        detail=False,
+        permission_classes=[IsAuthenticated, ]
+    )
     def download_shopping_cart(self, request):
         """Метод позволяет скачать корзину покупок."""
 
@@ -139,15 +153,23 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
-    search_fields = ('^name', )
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет работы с обьектами класса Tag."""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

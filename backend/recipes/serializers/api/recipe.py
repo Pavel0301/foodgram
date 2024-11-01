@@ -1,24 +1,14 @@
-from common.serializers import ImageMixin, ImageUrlMixin
-from recipes.models.recipes import (Ingredient, IngredientInRecipe, Recipe,
-                                    ShoppingCart, Tag)
-from recipes.serializers.nested.recipe import (CreateIngredientsInSerializer,
-                                               IngredientsInRecipeSerializer,
-                                               TagSerializer)
 from rest_framework import serializers
+
+from common.serializers import ImageMixin, ImageUrlMixin
+from recipes.models.recipes import (IngredientInRecipe, Recipe, ShoppingCart,
+                                    Tag)
+from recipes.serializers.nested.recipe import (
+    CreateIngredientsInRecipeSerializer, IngredientsInRecipeSerializer,
+    TagSerializer)
+from recipes.validators import recipe_validator
 from users.models.follows import Follow
 from users.serializers.api.users import UserSerializer
-
-
-class IngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор модели ингредиентов."""
-
-    class Meta:
-        model = Ingredient
-        fields = (
-            'id',
-            'name',
-            'measurement_unit'
-        )
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -47,6 +37,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
+        validators = [recipe_validator]
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
@@ -70,7 +61,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 class CreateRecipeSerializer(serializers.ModelSerializer, ImageUrlMixin):
     """Сериализатор для создания рецептов"""
 
-    ingredients = CreateIngredientsInSerializer(many=True)
+    ingredients = CreateIngredientsInRecipeSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True,
@@ -107,37 +98,39 @@ class CreateRecipeSerializer(serializers.ModelSerializer, ImageUrlMixin):
                 ingredients_list.append(ingredient.name)
         return data
 
-    def _create_ingredients(self, ingredients, recipe):
-        """Метод выполнет создание ингредиента в рецепте."""
-
-        for _ingredient in ingredients:
-            id = _ingredient.get('id')
-            ingredient = Ingredient.objects.get(id=id)
-            amount = _ingredient.get('amount')
-            IngredientInRecipe.objects.create(
-                ingredient=ingredient,
-                recipe=recipe,
-                amount=amount
-            )
-
-    def _create_tags(self, tags, recipe):
-        """Метод добавляет теги."""
-
-        recipe.tags.set(tags)
-
     def create(self, validated_data):
-        """Метод создания нового рецепта."""
-
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        user = self.context.get('request').user
-        recipe = Recipe.objects.create(**validated_data, author=user)
-        self._create_tags(tags, recipe)
-        self._create_ingredients(ingredients, recipe)
+        author = self.context.get('request').user
+        recipe = Recipe.objects.create(author=author, **validated_data)
+        recipe.tags.set(tags)
+        ingredients_data = [
+            IngredientInRecipe(
+                ingredients_id=ingredient['id'],
+                recipe=recipe,
+                amount=ingredient['amount']
+            ) for ingredient in ingredients
+        ]
+        IngredientInRecipe.objects.bulk_create(ingredients_data)
         return recipe
 
+    def update(self, instance, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        instance.tags.clear()
+        instance.tags.set(tags)
+        IngredientInRecipe.objects.filter(recipe=instance).delete()
+        ingredients_data = [
+            IngredientInRecipe(
+                ingredients_id=ingredient['id'],
+                recipe=instance,
+                amount=ingredient['amount']
+            ) for ingredient in ingredients
+        ]
+        IngredientInRecipe.objects.bulk_create(ingredients_data)
+        return super().update(instance, validated_data)
+
     def to_representation(self, instance):
-        """Метод сериализации рецепта."""
         return RecipeSerializer(instance, context=self.context).data
 
 
