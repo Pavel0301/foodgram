@@ -13,10 +13,10 @@ from recipes.filters import IngredientFilter, RecipeFilter
 from recipes.models.recipes import (Favorite, Ingredient, IngredientInRecipe,
                                     Recipe, ShoppingCart, Tag)
 from recipes.permissions import IsAdminOrReadOnly, IsAuthor
-from recipes.serializers.api.recipe import (ShoppingSerializer,
-                                            CreateRecipeSerializer,
+from recipes.serializers.api.recipe import (CreateRecipeSerializer,
                                             FavoriteSerializer,
-                                            RecipeSerializer)
+                                            RecipeSerializer,
+                                            ShoppingSerializer)
 from recipes.serializers.nested.recipe import (IngredientSerializer,
                                                TagSerializer)
 
