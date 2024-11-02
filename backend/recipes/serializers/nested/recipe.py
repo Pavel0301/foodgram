@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from common.serializers import Base64ImageField, ImageMixin
+from common.serializers import Base64ImageField
 from recipes.models.recipes import Ingredient, IngredientInRecipe, Recipe, Tag
 
 
@@ -16,7 +16,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         )
 
 
-class RecipeShortSerializer(serializers.Serializer, ImageMixin):
+class RecipeShortSerializer(serializers.Serializer):
 
     cooking_time = serializers.IntegerField()
     image = Base64ImageField()

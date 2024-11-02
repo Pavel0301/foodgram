@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError
 
-from common.serializers import Base64ImageField, ImageMixin
+from common.serializers import Base64ImageField
 from users.models.follows import Follow
 from users.models.users import User
 
@@ -87,7 +87,8 @@ class UserSearchSerializer(serializers.ModelSerializer):
         )
 
 
-class AvatarSerializer(serializers.ModelSerializer, ImageMixin):
+class AvatarSerializer(serializers.ModelSerializer):
+    avatar = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = User

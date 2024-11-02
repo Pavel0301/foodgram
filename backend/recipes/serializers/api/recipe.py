@@ -1,6 +1,6 @@
 from rest_framework import serializers, validators
 
-from common.serializers import Base64ImageField, ImageMixin
+from common.serializers import Base64ImageField
 from recipes.models.recipes import (Favorite, IngredientInRecipe, Recipe,
                                     ShoppingCart, Tag)
 from recipes.serializers.nested.recipe import (
@@ -58,7 +58,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         ).exists()
 
 
-class CreateRecipeSerializer(serializers.ModelSerializer, ImageMixin):
+class CreateRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для создания рецептов"""
 
     ingredients = CreateIngredientsInRecipeSerializer(many=True)
@@ -67,6 +67,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer, ImageMixin):
         many=True,
     )
     author = UserSerializer(read_only=True)
+    image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Recipe
@@ -116,19 +117,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer, ImageMixin):
 
     def to_representation(self, instance):
         return RecipeSerializer(instance, context=self.context).data
-
-
-class AddFavoriteSerializer(serializers.ModelSerializer, ImageMixin):
-    """Сериализатор для добавления рецепта в избранное."""
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'name',
-            'image',
-            'cooking_time',
-        )
 
 
 class FavoriteSerializer(UserRecipeSerializer):

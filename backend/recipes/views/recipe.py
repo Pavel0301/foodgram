@@ -1,4 +1,5 @@
 from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -13,7 +14,7 @@ from recipes.filters import IngredientFilter, RecipeFilter
 from recipes.models.recipes import (Favorite, Ingredient, IngredientInRecipe,
                                     Recipe, ShoppingCart, Tag)
 from recipes.permissions import IsAdminOrReadOnly, IsAuthor
-from recipes.serializers.api.recipe import (AddFavoriteSerializer,
+from recipes.serializers.api.recipe import (ShoppingSerializer,
                                             CreateRecipeSerializer,
                                             FavoriteSerializer,
                                             RecipeSerializer)
@@ -109,34 +110,38 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=['POST', 'DELETE'],
         permission_classes=[IsAuthenticated, ],
     )
-    def shopping_card(self, request, pk):
-        """Метод позваоляет управлять корзиной."""
-
-        user = request.user
-        recipe = get_object_or_404(Recipe, pk=pk)
-        shopping_cart = ShoppingCart.objects.filter(user=user, recipe=recipe)
-
-        if request.method == 'POST':
-
-            if shopping_cart.exists():
-                return Response(
-                    f'Рецепт {recipe.name} уже был добавлен в корзину.',
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            ShoppingCart.objects.create(user=user, recipe=recipe)
-            serializer = AddFavoriteSerializer(recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if shopping_cart.exists():
-            shopping_cart.delete()
+    def shopping_cart(self, request, pk):
+        if not Recipe.objects.filter(id=pk).exists():
             return Response(
-                f'Рецепт {recipe.name} был удален из корзины.',
-                status=status.HTTP_204_NO_CONTENT,
+                {'error': 'Данного рецепта не существует.'},
+                status=status.HTTP_404_NOT_FOUND
             )
-        return Response(
-            f'Нельзя удалить рецепт {recipe.name}.',
-            status=status.HTTP_400_BAD_REQUEST,
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Вы должны быть аутентифицированы для добавления в '
+                          'избранное.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        recipe = Recipe.objects.get(id=pk)
+        data = {
+            'user': request.user.id,
+            'recipe': recipe.id
+        }
+        serializer = ShoppingSerializer(data=data,
+                                        context={'request': request})
+        if request.method == 'POST':
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        favorite = ShoppingCart.objects.filter(
+            recipe=recipe,
+            user=request.user
         )
+        if not favorite:
+            return Response({"error": "Подписки не существует"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _put_ingredients_in_file(self, ingredients):
         text = ''
@@ -165,7 +170,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             sum=Sum('amount')
         )
         ingredients_list = self._put_ingredients_in_file(ingredients)
-        return Response(ingredients_list, content_type='text/plain')
+        return HttpResponse(ingredients_list, content_type='text/plain')
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):

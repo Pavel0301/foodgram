@@ -69,6 +69,7 @@ class Recipe(models.Model):
         upload_to='recipes/images/',
         blank=True,
         verbose_name='Фото рецепта',
+        default=None,
     )
     text = models.TextField(
         verbose_name='Описание рецепта',
@@ -129,6 +130,7 @@ class IngredientInRecipe(models.Model):
                 message='Минимальное количество 1!',
             )
         ],
+        default=1,
     )
 
     class Meta:
