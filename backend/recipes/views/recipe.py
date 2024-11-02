@@ -160,16 +160,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         """Метод позволяет скачать корзину покупок."""
 
+        user = request.user
         ingredients = IngredientInRecipe.objects.filter(
-            recipe__shopping_cart__user=request.user
+            recipe__shopping_cart__user=user
         ).values(
-            'ingredients__name',
-            'ingredients__measurement_unit',
-        ).annotate(
-            sum=Sum('amount')
-        )
-        ingredients_list = self._put_ingredients_in_file(ingredients)
-        return HttpResponse(ingredients_list, content_type='text/plain')
+            'ingredients__name', 'ingredients__measurement_unit'
+        ).annotate(sum=Sum('amount')).order_by('ingredients__name')
+        if not ingredients.exists():
+            return HttpResponse("Вы ничего не добавляли в список покупок",
+                                content_type='text/plain')
+        shopping_cart = self._put_ingredients_in_file(ingredients)
+        return HttpResponse(shopping_cart, content_type='text/plain')
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
