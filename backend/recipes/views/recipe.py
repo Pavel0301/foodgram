@@ -1,6 +1,5 @@
 from django.db.models import Sum
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django_filters.rest_framework import DjangoFilterBackend
