@@ -1,5 +1,3 @@
-version: '3'
-
 volumes:
   pg_data:
   static:
@@ -35,7 +33,7 @@ services:
       - "8000:80"
     volumes:
       - static:/static
-      - media:/app/media/
+      - media:/media/
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
     depends_on:
