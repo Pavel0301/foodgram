@@ -1,5 +1,7 @@
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -13,6 +15,7 @@ from recipes.models.recipes import (Favorite, Ingredient, IngredientInRecipe,
 from recipes.permissions import IsAdminOrReadOnly, IsAuthor
 from recipes.serializers.api.recipe import (AddFavoriteSerializer,
                                             CreateRecipeSerializer,
+                                            FavoriteSerializer,
                                             RecipeSerializer)
 from recipes.serializers.nested.recipe import (IngredientSerializer,
                                                TagSerializer)
@@ -49,39 +52,57 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=('post', 'delete', ),
-        permission_classes=(IsAuthenticated,),
-        url_path='favorite',
-        url_name='favorite',
+        methods=('get',),
+        url_path='get-link'
+    )
+    def get_link(self, request):
+        try:
+            recipe = self.get_object()
+            recipe_id = urlsafe_base64_encode(force_bytes(recipe.id))
+            short_link = request.build_absolute_uri(f'/recipes/{recipe_id}/')
+            return Response({'short-link': short_link},
+                            status=status.HTTP_200_OK)
+        except Recipe.DoesNotExist:
+            return Response({'detail': 'Рецепт не найден.'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    @action(
+        detail=True,
+        methods=['POST', 'DELETE'],
+        permission_classes=[IsAuthenticated, ],
     )
     def favorite(self, request, pk):
-        """Метод позваоляет управлять подписками."""
-
-        user = request.user
-        recipe = get_object_or_404(Recipe, pk=pk)
-        favorite = Favorite.objects.filter(recipe=recipe, user=user)
-
-        if request.method == 'POST':
-
-            if favorite.exists():
-                return Response(
-                    f'Нельзя повторно добавить в избранное {recipe.name}',
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            Favorite.objects.create(recipe=recipe, user=user)
-            serializer = AddFavoriteSerializer(recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if favorite.exists():
-            favorite.delete()
+        if not Recipe.objects.filter(id=pk).exists():
             return Response(
-                f'Вы успешно удалили из избранного {recipe.name}',
-                status=status.HTTP_204_NO_CONTENT,
+                {'error': 'Данного рецепта не существует.'},
+                status=status.HTTP_404_NOT_FOUND
             )
-        return Response(
-            f'Вы не добавлялись в избранное {recipe.name}',
-            status=status.HTTP_400_BAD_REQUEST,
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Вы должны быть аутентифицированы для добавления в '
+                 'избранное.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        recipe = Recipe.objects.get(id=pk)
+        data = {
+            'user': request.user.id,
+            'recipe': recipe.id
+        }
+        serializer = FavoriteSerializer(data=data,
+                                        context={'request': request})
+        if request.method == 'POST':
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        favorite = Favorite.objects.filter(
+            recipe=recipe,
+            user=request.user
         )
+        if not favorite:
+            return Response({"error": "Подписки не существует"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,

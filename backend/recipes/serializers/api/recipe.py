@@ -1,11 +1,11 @@
-from rest_framework import serializers
+from rest_framework import serializers, validators
 
-from common.serializers import ImageMixin, ImageUrlMixin
-from recipes.models.recipes import (IngredientInRecipe, Recipe, ShoppingCart,
-                                    Tag)
+from common.serializers import Base64ImageField, ImageMixin, ImageUrlMixin
+from recipes.models.recipes import (Favorite, IngredientInRecipe, Recipe,
+                                    ShoppingCart, Tag)
 from recipes.serializers.nested.recipe import (
     CreateIngredientsInRecipeSerializer, IngredientsInRecipeSerializer,
-    TagSerializer)
+    TagSerializer, UserRecipeSerializer)
 from recipes.validators import recipe_validator
 from users.models.follows import Follow
 from users.serializers.api.users import UserSerializer
@@ -16,11 +16,13 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     tags = TagSerializer(many=True)
     ingredients = IngredientsInRecipeSerializer(
-        many=True
+        many=True,
+        source='ingredientinrecipe_set'
     )
-    author = UserSerializer()
+    author = UserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
@@ -36,7 +38,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
-        validators = [recipe_validator]
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
@@ -57,7 +58,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         ).exists()
 
 
-class CreateRecipeSerializer(serializers.ModelSerializer, ImageUrlMixin):
+class CreateRecipeSerializer(serializers.ModelSerializer, ImageMixin):
     """Сериализатор для создания рецептов"""
 
     ingredients = CreateIngredientsInRecipeSerializer(many=True)
@@ -65,37 +66,21 @@ class CreateRecipeSerializer(serializers.ModelSerializer, ImageUrlMixin):
         queryset=Tag.objects.all(),
         many=True,
     )
+    author = UserSerializer(read_only=True)
 
     class Meta:
         model = Recipe
         fields = (
+            'id',
+            'author',
+            'name',
             'ingredients',
             'tags',
-            'name',
             'image',
             'text',
             'cooking_time',
         )
-
-    def validate(self, data):
-        """Проверка каждого ингредиента."""
-
-        ingredients_list = []
-        ingredients = data.get('ingredients')
-        if ingredients:
-            for ingredient in ingredients:
-                if not ingredient.get('name') or not ingredient.get(
-                        'measurement_unit'
-                ):
-                    raise serializers.ValidationError(
-                        'У ингредиентов должно быть название и мера'
-                    )
-                if ingredient.name in ingredients:
-                    raise serializers.ValidationError(
-                        'Ингредиенты не должны повторяться'
-                    )
-                ingredients_list.append(ingredient.name)
-        return data
+        validators = [recipe_validator]
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -144,3 +129,28 @@ class AddFavoriteSerializer(serializers.ModelSerializer, ImageMixin):
             'image',
             'cooking_time',
         )
+
+class FavoriteSerializer(UserRecipeSerializer):
+
+    class Meta(UserRecipeSerializer.Meta):
+        model = Favorite
+        validators = [
+            validators.UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=('user', 'recipe'),
+                message='Рецепт в избранном',
+            ),
+        ]
+
+
+class ShoppingSerializer(UserRecipeSerializer):
+
+    class Meta(UserRecipeSerializer.Meta):
+        model = ShoppingCart
+        validators = [
+            validators.UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=('user', 'recipe'),
+                message='Рецепт в списке покупок',
+            ),
+        ]

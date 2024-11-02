@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError
 
-from common.serializers import ImageMixin
+from common.serializers import Base64ImageField, ImageMixin
 from users.models.follows import Follow
 from users.models.users import User
 
@@ -51,9 +51,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserSerializer(serializers.ModelSerializer, ImageMixin):
+class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели User."""
 
+    avatar = Base64ImageField(required=False, allow_null=True)
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -64,7 +65,7 @@ class UserSerializer(serializers.ModelSerializer, ImageMixin):
             'last_name',
             'email',
             'username',
-            'image',
+            'avatar',
             'is_subscribed',
         )
 
@@ -84,3 +85,10 @@ class UserSearchSerializer(serializers.ModelSerializer):
             'username',
             'full_name',
         )
+
+
+class AvatarSerializer(serializers.ModelSerializer, ImageMixin):
+
+    class Meta:
+        model = User
+        fields = ('avatar',)

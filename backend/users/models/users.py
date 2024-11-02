@@ -53,11 +53,10 @@ class User(AbstractUser):
         choices=CHOICES,
         default='user'
     )
-    image = models.ImageField(
+    avatar = models.ImageField(
         verbose_name='Фотография профиля',
         blank=True,
         null=True,
-        upload_to='profiles/'
     )
 
     objects = CustomUserManager()

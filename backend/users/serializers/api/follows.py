@@ -1,11 +1,12 @@
 from rest_framework import serializers, validators
 
-from recipes.serializers.nested.recipe import OptionalRecipeSerializer
+from recipes.models.recipes import Recipe
+from recipes.serializers.nested.recipe import RecipeShortSerializer
 from users.models.follows import Follow
 from users.models.users import User
 
 
-class FollowSerializer(serializers.ModelSerializer):
+class FollowInfoSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
     recipes = serializers.SerializerMethodField(read_only=True)
@@ -31,18 +32,16 @@ class FollowSerializer(serializers.ModelSerializer):
         )
 
     def get_recipes(self, obj):
-        """Метод для получения рецептов"""
-
         request = self.context.get('request')
-        recipes = obj.recipes.all()
         recipes_limit = request.query_params.get('recipes_limit')
-        if recipes_limit:
-            recipes = recipes[:int(recipes_limit)]
-        return OptionalRecipeSerializer(recipes, many=True).data
+        recipes_queryset = Recipe.objects.filter(author=obj)
+        if recipes_limit is not None:
+            recipes_queryset = recipes_queryset[:int(recipes_limit)]
+        serializer = RecipeShortSerializer(recipes_queryset, many=True)
+        return serializer.data
 
-    @staticmethod
-    def get_recipes_count(obj):
-        return obj.recipes.count()
+    def get_recipes_count(self, obj):
+        return Recipe.objects.filter(author=obj).count()
 
     def get_is_subscribed(self, obj):
         request = self.context.get("request")
@@ -56,11 +55,15 @@ class FollowSerializer(serializers.ModelSerializer):
         )
 
 
-class FollowInfoSerializer(serializers.ModelSerializer):
+class FollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Follow
-        fields = ('id', 'user', 'following')
+        fields = (
+            'id',
+            'user',
+            'following'
+        )
         validators = [
             validators.UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
@@ -72,7 +75,7 @@ class FollowInfoSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request.user == data["following"]:
             raise serializers.ValidationError(
-                'Пользователь не может подписаться на самого себя.'
+                'Вы не может подписаться на самого себя.'
             )
         return data
 

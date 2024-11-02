@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from common.serializers import ImageMixin
+from common.serializers import Base64ImageField, ImageMixin
 from recipes.models.recipes import Ingredient, IngredientInRecipe, Recipe, Tag
 
 
@@ -19,6 +19,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecipeShortSerializer(serializers.Serializer, ImageMixin):
 
     cooking_time = serializers.IntegerField()
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
@@ -95,15 +96,13 @@ class CreateIngredientsInRecipeSerializer(serializers.ModelSerializer):
             'amount',
         )
 
-
-class OptionalRecipeSerializer(serializers.ModelSerializer):
-    """Дополнительный сериализатор для рецептов """
+class UserRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'name',
-            'image',
-            'cooking_time'
-        )
+        fields = ('user', 'recipe')
+
+    def to_representation(self, instance):
+        return RecipeShortSerializer(
+            instance.recipe,
+            context={"request": self.context.get("request")},
+        ).data
