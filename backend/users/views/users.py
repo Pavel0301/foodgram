@@ -119,29 +119,45 @@ class UserViewSet(views.UserViewSet):
         user = request.user
         if request.method == 'GET':
             if user.avatar:
-                return Response({'avatar_url': user.avatar.url},
-                                status=status.HTTP_200_OK)
-            return Response({'detail': 'Аватар не найден'},
-                            status=status.HTTP_204_NO_CONTENT)
+                return Response(
+                    data={'avatar_url': user.avatar.url},
+                    status=status.HTTP_200_OK
+                )
+            return Response(
+                data={'detail': 'Аватар не найден'},
+                status=status.HTTP_204_NO_CONTENT
+            )
         elif request.method == 'PUT':
             if 'avatar' not in request.data:
-                return Response({'detail':
-                                     'Файл аватара не был предоставлен.'},
-                                status=status.HTTP_400_BAD_REQUEST)
-            serializer = user_s.AvatarSerializer(user, data=request.data,
-                                          partial=True)
+                return Response(
+                    data={'detail':'Файл аватара не был предоставлен.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            serializer = user_s.AvatarSerializer(
+                user,
+                data=request.data,
+                partial=True
+            )
             if serializer.is_valid():
                 serializer.save()
-                return Response({'avatar': user.avatar.url},
-                                status=status.HTTP_200_OK)
-            return Response({'detail': 'Файл аватара не был предоставлен.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    data={'avatar': user.avatar.url},
+                    status=status.HTTP_200_OK
+                )
+            return Response(
+                data={'detail': 'Файл аватара не был предоставлен.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         elif request.method == 'DELETE':
             if user.avatar:
                 user.avatar.delete(save=False)
                 user.avatar = None
                 user.save()
-                return Response({'detail': 'Файл аватара удален.'},
-                                status=status.HTTP_204_NO_CONTENT)
-            return Response({'detail': 'Аватар не найден'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    data={'detail': 'Файл аватара удален.'},
+                    status=status.HTTP_204_NO_CONTENT
+                )
+            return Response(
+                data={'detail': 'Аватар не найден'},
+                status=status.HTTP_400_BAD_REQUEST
+            )

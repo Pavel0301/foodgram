@@ -1,6 +1,6 @@
 from rest_framework import serializers, validators
 
-from common.serializers import Base64ImageField, ImageMixin, ImageUrlMixin
+from common.serializers import Base64ImageField, ImageMixin
 from recipes.models.recipes import (Favorite, IngredientInRecipe, Recipe,
                                     ShoppingCart, Tag)
 from recipes.serializers.nested.recipe import (
@@ -129,6 +129,7 @@ class AddFavoriteSerializer(serializers.ModelSerializer, ImageMixin):
             'image',
             'cooking_time',
         )
+
 
 class FavoriteSerializer(UserRecipeSerializer):
 

@@ -96,6 +96,7 @@ class CreateIngredientsInRecipeSerializer(serializers.ModelSerializer):
             'amount',
         )
 
+
 class UserRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
