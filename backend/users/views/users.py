@@ -130,7 +130,7 @@ class UserViewSet(views.UserViewSet):
         elif request.method == 'PUT':
             if 'avatar' not in request.data:
                 return Response(
-                    data={'detail':'Файл аватара не был предоставлен.'},
+                    data={'detail': 'Файл аватара не был предоставлен.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             serializer = user_s.AvatarSerializer(
