@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 
-DEBUG = os.getenv('DEBUG', default=0)
+DEBUG = os.getenv('DEBUG', default=1)
 
 ALLOWED_HOSTS = ['127.0.0.1', '89.169.165.28', 'localhost', 'fodhhh.zapto.org']
 
@@ -108,6 +108,7 @@ STATIC_ROOT = BASE_DIR / 'collected_static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

@@ -16,8 +16,6 @@ services:
     volumes:
       - static:/backend_static
       - media:/media
-    depends_on:
-      - db
 
   frontend:
     env_file: .env
@@ -30,12 +28,9 @@ services:
     image: papoken/foodgram_gateway
     env_file: .env
     ports:
-      - "8000:80"
+      - 8000:80
     volumes:
       - static:/static
       - media:/media/
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
-    depends_on:
-      - backend
-      - frontend
