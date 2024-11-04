@@ -154,10 +154,10 @@ class UserViewSet(views.UserViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         elif request.method == 'DELETE':
-            if user.avatar:
-                user.avatar.delete(save=False)
-                user.avatar = None
-                user.save()
+            if request.user.avatar:
+                request.user.avatar.delete(save=False)
+                request.user.avatar = None
+                request.user.save()
                 return Response(
                     data={'detail': 'Файл аватара удален.'},
                     status=status.HTTP_204_NO_CONTENT
