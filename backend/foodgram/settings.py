@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 
-DEBUG = os.getenv('DEBUG', default=1)
+DEBUG = os.getenv('DEBUG', default=0)
 
 ALLOWED_HOSTS = ['89.169.165.28', 'fodddh.zapto.org']
 
