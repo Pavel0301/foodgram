@@ -121,7 +121,8 @@ class UserViewSet(views.UserViewSet):
             serializer = user_s.UserSerializer(
                 request.user,
                 data=request.data,
-                partial=True
+                partial=True,
+                context={'request': request}
             )
             if request.user.avatar:
                 return Response(
@@ -139,10 +140,8 @@ class UserViewSet(views.UserViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             serializer = user_s.UserSerializer(
-                request.user,
-                data=request.data,
-                partial=True
-            )
+                request.user, data=request.data, partial=True,
+                context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(
