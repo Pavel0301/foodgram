@@ -116,11 +116,16 @@ class UserViewSet(views.UserViewSet):
     )
     def avatar(self, request):
         """Получение или обновление аватара пользователя."""
-        user = request.user
+
         if request.method == 'GET':
-            if user.avatar:
+            serializer = user_s.UserSerializer(
+                request.user,
+                data=request.data,
+                partial=True
+            )
+            if request.user.avatar:
                 return Response(
-                    data={'avatar': user.avatar.url},
+                    data={'avatar': serializer.data.get('avatar')},
                     status=status.HTTP_304_NOT_MODIFIED
                 )
             return Response(
@@ -133,16 +138,16 @@ class UserViewSet(views.UserViewSet):
                     data={'detail': 'Файл аватара не был предоставлен.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            serializer = user_s.AvatarSerializer(
-                user,
+            serializer = user_s.UserSerializer(
+                request.user,
                 data=request.data,
                 partial=True
             )
             if serializer.is_valid():
                 serializer.save()
                 return Response(
-                    data={'avatar': user.avatar.url},
-                    status=status.HTTP_200_OK
+                    data={'avatar': serializer.data.get('avatar')},
+                    status=status.HTTP_304_NOT_MODIFIED
                 )
             return Response(
                 data={'detail': 'Файл аватара не был предоставлен.'},
