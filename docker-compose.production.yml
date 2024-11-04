@@ -17,7 +17,6 @@ services:
       - media:/media
     depends_on:
       - db
-    network_mode: host
 
   frontend:
     env_file: .env
