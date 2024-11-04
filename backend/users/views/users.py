@@ -120,8 +120,8 @@ class UserViewSet(views.UserViewSet):
         if request.method == 'GET':
             if user.avatar:
                 return Response(
-                    data={'avatar_url': user.avatar.url},
-                    status=status.HTTP_200_OK
+                    data={'avatar': user.avatar.url},
+                    status=status.HTTP_304_NOT_MODIFIED
                 )
             return Response(
                 data={'detail': 'Аватар не найден'},
