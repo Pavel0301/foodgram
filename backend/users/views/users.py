@@ -53,7 +53,7 @@ class UserViewSet(views.UserViewSet):
             if 'avatar' not in data:
                 data = {'avatar': None}
             instance = self.get_instance()
-            serializer = user_s.AvatarSerializer(instance, data=request.data)
+            serializer = user_s.AvatarSerializer(instance, data=data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
