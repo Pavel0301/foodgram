@@ -116,17 +116,11 @@ class UserViewSet(views.UserViewSet):
     )
     def avatar(self, request):
         """Получение или обновление аватара пользователя."""
-
+        user = request.user
         if request.method == 'GET':
-            serializer = user_s.UserSerializer(
-                request.user,
-                data=request.data,
-                partial=True,
-                context={'request': request}
-            )
-            if request.user.avatar:
+            if user.avatar:
                 return Response(
-                    data={'avatar': serializer.data.get('avatar')},
+                    data={'avatar': user.avatar.url},
                     status=status.HTTP_304_NOT_MODIFIED
                 )
             return Response(
@@ -139,24 +133,24 @@ class UserViewSet(views.UserViewSet):
                     data={'detail': 'Файл аватара не был предоставлен.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            serializer = user_s.UserSerializer(
-                request.user, data=request.data, partial=True,
+            serializer = user_s.AvatarSerializer(
+                user, data=request.data, partial=True,
                 context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(
-                    data={'avatar': serializer.data.get('avatar')},
-                    status=status.HTTP_304_NOT_MODIFIED
+                    data={'avatar': user.avatar.url},
+                    status=status.HTTP_200_OK
                 )
             return Response(
                 data={'detail': 'Файл аватара не был предоставлен.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         elif request.method == 'DELETE':
-            if request.user.avatar:
-                request.user.avatar.delete(save=False)
-                request.user.avatar = None
-                request.user.save()
+            if user.avatar:
+                user.avatar.delete(save=False)
+                user.avatar = None
+                user.save()
                 return Response(
                     data={'detail': 'Файл аватара удален.'},
                     status=status.HTTP_204_NO_CONTENT
