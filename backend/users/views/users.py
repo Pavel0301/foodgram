@@ -24,6 +24,41 @@ class UserViewSet(views.UserViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     @action(
+        methods=('get',),
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+        url_name='me',
+    )
+    def me(self, request):
+        """Получение или обновление пользователя."""
+        serializer = user_s.UserSerializer(request.user)
+        return Response(serializer.data)
+
+    @action(
+        methods=('put', 'delete'),
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+        url_path='me/avatar'
+    )
+    def avatar(self, request):
+        """Получение или обновление аватара пользователя."""
+        if request.method == 'PUT':
+            instance = self.get_instance()
+            serializer = user_s.AvatarSerializer(instance, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        elif request.method == 'DELETE':
+            data = request.data
+            if 'avatar' not in data:
+                data = {'avatar': None}
+            instance = self.get_instance()
+            serializer = user_s.AvatarSerializer(instance, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+    @action(
         detail=False,
         methods=('get',),
         permission_classes=(IsAuthenticated,),
@@ -97,65 +132,3 @@ class UserViewSet(views.UserViewSet):
             f'Вы не подписаны на {author}',
             status=status.HTTP_400_BAD_REQUEST
         )
-
-    @action(
-        methods=('get', 'patch'),
-        detail=False,
-        permission_classes=(IsAuthenticated, )
-    )
-    def me(self, request):
-        """Получение или обновление пользователя."""
-        serializer = user_s.UserSerializer(request.user)
-        return Response(serializer.data)
-
-    @action(
-        methods=('get', 'put', 'delete'),
-        detail=False,
-        permission_classes=(IsAuthenticated, ),
-        url_path='me/avatar'
-    )
-    def avatar(self, request):
-        """Получение или обновление аватара пользователя."""
-        user = request.user
-        if request.method == 'GET':
-            if user.avatar:
-                return Response(
-                    data={'avatar': user.avatar.url},
-                    status=status.HTTP_304_NOT_MODIFIED
-                )
-            return Response(
-                data={'detail': 'Аватар не найден'},
-                status=status.HTTP_204_NO_CONTENT
-            )
-        elif request.method == 'PUT':
-            if 'avatar' not in request.data:
-                return Response(
-                    data={'detail': 'Файл аватара не был предоставлен.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            serializer = user_s.AvatarSerializer(
-                user, data=request.data, partial=True,
-                context={'request': request})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(
-                    data={'avatar': user.avatar.url},
-                    status=status.HTTP_200_OK
-                )
-            return Response(
-                data={'detail': 'Файл аватара не был предоставлен.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif request.method == 'DELETE':
-            if user.avatar:
-                user.avatar.delete(save=False)
-                user.avatar = None
-                user.save()
-                return Response(
-                    data={'detail': 'Файл аватара удален.'},
-                    status=status.HTTP_204_NO_CONTENT
-                )
-            return Response(
-                data={'detail': 'Аватар не найден'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
