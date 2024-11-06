@@ -12,7 +12,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = os.getenv('DEBUG', default=1)
 
-ALLOWED_HOSTS = ['89.169.165.28', 'localhost', '127/0/0/1', 'fodddh.zapto.org']
+ALLOWED_HOSTS = ['89.169.165.28', 'localhost', '127.0.0.1', 'fodddh.zapto.org']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -91,7 +91,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LANGUAGE_CODE = 'ru'
+LANGUAGE_CODE = 'ru-Ru'
 
 TIME_ZONE = 'UTC'
 
@@ -122,9 +122,6 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ],
     'LOGIN_FIELD': 'email',
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.AllowAny'],
