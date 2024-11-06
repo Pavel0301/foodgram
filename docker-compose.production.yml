@@ -32,7 +32,7 @@ services:
       - 8000:80
     volumes:
       - static:/static
-      - food_media:/usr/share/nginx/html/media
+      - food_media:/media
     depends_on:
       - backend
       - frontend
