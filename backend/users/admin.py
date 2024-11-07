@@ -1,9 +1,13 @@
 from django.contrib import admin
 
-from common.admin import BaseAdmin
-from users.models.users import User
+from .models import Follow, User
 
-from .models.follows import Follow
+
+class BaseAdmin(admin.ModelAdmin):
+    """Базовый класс для настройки административной панели Django."""
+
+    empty_value_display = '-'
+    list_per_page = 20
 
 
 @admin.register(User)
@@ -14,14 +18,9 @@ class UserAdmin(BaseAdmin):
         'last_name',
         'email',
     )
-    search_fields = (
-        'username',
-        'email',
-    )
-    list_filter = (
-        'username',
-        'email',
-    )
+    search_fields = ('username', 'email',)
+    list_filter = ('username', 'email',)
+    ordering = ('username', )
 
 
 @admin.register(Follow)
@@ -30,15 +29,7 @@ class FollowAdmin(BaseAdmin):
         'user',
         'following',
     )
-    list_filter = (
-        'user',
-        'following',
-    )
-    search_fields = (
-        'user__username',
-        'following__username',
-    )
-    list_display_links = (
-        'user',
-        'following',
-    )
+    list_display_links = ('user', 'following')
+    search_fields = ('user__username', 'following__username',)
+    list_filter = ('user', 'following',)
+    ordering = ('user', )
