@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='SECRET_KEY')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '89.169.168.11', 'localhost', 'foodgramforu.ddns.net']
+ALLOWED_HOSTS = ['89.169.165.28', 'localhost', '127.0.0.1', 'fodddh.zapto.org']
 
 
 INSTALLED_APPS = [
